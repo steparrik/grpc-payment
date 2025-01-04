@@ -38,3 +38,5 @@ build/
 /PaymentService/mvnw.cmd
 /AccountService/mvnw
 /AccountService/mvnw.cmd
+/AccountService/.mvn/
+/PaymentService/.mvn/
