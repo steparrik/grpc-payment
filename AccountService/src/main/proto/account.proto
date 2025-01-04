@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package account;
+
+service AccountService {
+  rpc GetBalance (AccountRequest) returns (AccountResponse);
+  rpc DeductBalance (DeductRequest) returns (DeductResponse);
+}
+
+message AccountRequest {
+  string user_id = 1;
+}
+
+message AccountResponse {
+  string user_id = 1;
+  int32 balance = 2;
+}
+
+message DeductRequest {
+  string user_id = 1;
+  int32 amount = 2;
+}
+
+message DeductResponse {
+  bool success = 1;
+  string message = 2;
+}
