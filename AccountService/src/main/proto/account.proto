@@ -5,6 +5,9 @@ package account;
 service AccountService {
   rpc GetBalance (AccountRequest) returns (AccountResponse);
   rpc DeductBalance (DeductRequest) returns (DeductResponse);
+
+  rpc GetBalanceBi (stream AccountRequest) returns (stream AccountResponse);
+  rpc DeductBalanceBi (stream DeductRequest) returns (stream DeductResponse);
 }
 
 message AccountRequest {

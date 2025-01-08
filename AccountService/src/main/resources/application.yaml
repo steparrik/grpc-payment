@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: AccountService-grpc
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/testgrpc
+    password: st2606stt
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+grpc:
+  server:
+    port: 9090
+server:
+  port: 8080
