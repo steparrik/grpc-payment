@@ -1,30 +1,28 @@
-# Сервис платежей
-
-Проект включает два микросервиса: **AccountService** и **PaymentService**, предназначенных для наглядного сравнения двух типов взаимодействия между сервисами: через **REST** и **gRPC**.
+# Payment Service
+The project includes two microservices: **AccountService** and **PaymentService**, designed to showcase two types of communication between services: via **REST** and **gRPC**.
 
 ---
 
-## Описание
+## Description
+- **AccountService** — manages user accounts and balances.
+- **PaymentService** — processes payments and calls methods from **AccountService** to update balances.
 
-- **AccountService** — управляет аккаунтами пользователей и их балансами.
-- **PaymentService** — обрабатывает платежи и вызывает методы **AccountService** для изменения баланса.
-
-Проект демонстрирует два способа взаимодействия:
+The project demonstrates two communication approaches:
 - **REST** 
-- **gRPC** 
+- **gRPC**
 
 ---
 
-## Основная задачи
-
-- Разработать API с которым можно будет сравнить скорость и производительность: **REST** и **gRPC** 
+## Main Objective
+- The goal is to develop an API to compare the speed and performance of **REST** vs **gRPC**.
 
 ---
 
-## Бенчмарки
+## Benchmarks
+For performance evaluation, I used **Apache Benchmark**.
 
-Для оценки производительности я использовал **Apache Benchmark**. 
+During testing with 1000 requests and 100 concurrent threads, I observed the following results:
 
-При 1000 запросах к API в 100 разных одновременных потоках, я получил такие результаты:
+In this benchmark, the PaymentService was tested, where the amount parameter in the request indicates the number of requests to be made between services. The higher the value of amount, the more requests occur behind the scenes, between services, without the user's direct involvement. In my test, I used a value of 5 for amount.
 
 ![](img.png)
