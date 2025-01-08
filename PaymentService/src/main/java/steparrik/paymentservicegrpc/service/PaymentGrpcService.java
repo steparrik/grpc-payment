@@ -19,13 +19,13 @@ public class PaymentGrpcService {
     private AccountServiceGrpc.AccountServiceStub asyncAccountServiceStub;
 
     public PaymentDto makePayment(String userId, Integer amount) {
-        Account.AccountRequest accountRequest =
-                Account.AccountRequest.newBuilder().setUserId(userId).build();
-        Account.AccountResponse accountResponse = accountServiceStub.getBalance(accountRequest);
-
         Account.DeductRequest deductRequest =
-                Account.DeductRequest.newBuilder().setUserId(userId).setAmount(amount).build();
+                Account.DeductRequest.newBuilder().setUserId(userId).setAmount(1).build();
         Account.DeductResponse deductResponse = accountServiceStub.deductBalance(deductRequest);
+
+        for(int i = 0;i<amount-1;i++){
+            deductResponse = accountServiceStub.deductBalance(deductRequest);
+        }
 
         if (deductResponse.getSuccess()) {
             return new PaymentDto(true, "Payment successful");
@@ -37,59 +37,42 @@ public class PaymentGrpcService {
     public CompletableFuture<PaymentDto> makePaymentBi(String userId, Integer amount) {
         CompletableFuture<PaymentDto> completableFuture = new CompletableFuture<>();
 
-        StreamObserver<Account.AccountRequest> requestStream =
-                asyncAccountServiceStub.getBalanceBi(
-                        new StreamObserver<Account.AccountResponse>() {
+        StreamObserver<Account.DeductRequest> deductRequestStream =
+                asyncAccountServiceStub.deductBalanceBi(
+                        new StreamObserver<Account.DeductResponse>() {
                             @Override
-                            public void onNext(Account.AccountResponse accountResponse) {
-                                StreamObserver<Account.DeductRequest> deductRequestStream =
-                                        asyncAccountServiceStub.deductBalanceBi(
-                                                new StreamObserver<Account.DeductResponse>() {
-                                                    @Override
-                                                    public void onNext(
-                                                            Account.DeductResponse deductResponse) {
-                                                        if (deductResponse.getSuccess()) {
-                                                            completableFuture.complete(
-                                                                    new PaymentDto(
-                                                                            true,
-                                                                            "Payment successful"));
-                                                        } else {
-                                                            completableFuture.complete(
-                                                                    new PaymentDto(
-                                                                            false,
-                                                                            deductResponse
-                                                                                    .getMessage()));
-                                                        }
-                                                    }
-
-                                                    @Override
-                                                    public void onError(Throwable t) {
-                                                        completableFuture.completeExceptionally(t);
-                                                    }
-
-                                                    @Override
-                                                    public void onCompleted() {}
-                                                });
-
-                                deductRequestStream.onNext(
-                                        Account.DeductRequest.newBuilder()
-                                                .setUserId(userId)
-                                                .setAmount(amount)
-                                                .build());
-                                deductRequestStream.onCompleted();
+                            public void onNext(
+                                    Account.DeductResponse deductResponse) {
+                                if (deductResponse.getSuccess()) {
+                                    completableFuture.complete(
+                                            new PaymentDto(
+                                                    true,
+                                                    "Payment successful"));
+                                } else {
+                                    completableFuture.complete(
+                                            new PaymentDto(
+                                                    false,
+                                                    deductResponse
+                                                            .getMessage()));
+                                }
                             }
-
                             @Override
                             public void onError(Throwable t) {
                                 completableFuture.completeExceptionally(t);
                             }
-
                             @Override
                             public void onCompleted() {}
                         });
 
-        requestStream.onNext(Account.AccountRequest.newBuilder().setUserId(userId).build());
-        requestStream.onCompleted();
+        for(int i = 0;i<amount;i++) {
+            deductRequestStream.onNext(
+                    Account.DeductRequest.newBuilder()
+                            .setUserId(userId)
+                            .setAmount(1)
+                            .build());
+        }
+        deductRequestStream.onCompleted();
+
 
         return completableFuture;
     }

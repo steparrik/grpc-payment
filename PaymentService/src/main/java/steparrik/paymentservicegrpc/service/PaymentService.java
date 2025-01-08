@@ -20,14 +20,19 @@ public class PaymentService {
     }
 
     public PaymentDto makePayment(@PathVariable String userId, @RequestParam Integer amount) {
-        restTemplate.getForEntity("http://localhost:8080/account/balance/1", AccountResponse.class);
+        DeductRequest deductRequest = new DeductRequest(userId, 1);
 
-        DeductRequest deductRequest = new DeductRequest(userId, amount);
-        ResponseEntity<DeductResponse> deductResponse =
-                restTemplate.postForEntity(
-                        "http://localhost:8080/account/deduct",
-                        deductRequest,
-                        DeductResponse.class);
+        ResponseEntity<DeductResponse> deductResponse = restTemplate.postForEntity(
+                "http://localhost:8080/account/deduct",
+                deductRequest,
+                DeductResponse.class);;
+
+        for(int i = 0;i<amount-1;i++){
+            deductResponse =  restTemplate.postForEntity(
+                    "http://localhost:8080/account/deduct",
+                    deductRequest,
+                    DeductResponse.class);
+        }
 
         if (deductResponse.getBody() != null && deductResponse.getBody().isSuccess()) {
             return new PaymentDto(true, "Payment successful");
