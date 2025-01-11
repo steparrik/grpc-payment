@@ -3,14 +3,13 @@ package steparrik.paymentservicegrpc.service;
 import account.Account;
 import account.AccountServiceGrpc;
 import io.grpc.stub.StreamObserver;
+import java.util.concurrent.CompletableFuture;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 import steparrik.paymentservicegrpc.dto.PaymentDto;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service
-public class PaymentGrpcService {
+public class PaymentGrpcClient {
 
     @GrpcClient("accountServiceGrpc")
     private AccountServiceGrpc.AccountServiceBlockingStub accountServiceStub;
@@ -23,7 +22,7 @@ public class PaymentGrpcService {
                 Account.DeductRequest.newBuilder().setUserId(userId).setAmount(1).build();
         Account.DeductResponse deductResponse = accountServiceStub.deductBalance(deductRequest);
 
-        for(int i = 0;i<amount-1;i++){
+        for (int i = 0; i < amount - 1; i++) {
             deductResponse = accountServiceStub.deductBalance(deductRequest);
         }
 
@@ -41,38 +40,30 @@ public class PaymentGrpcService {
                 asyncAccountServiceStub.deductBalanceBi(
                         new StreamObserver<Account.DeductResponse>() {
                             @Override
-                            public void onNext(
-                                    Account.DeductResponse deductResponse) {
+                            public void onNext(Account.DeductResponse deductResponse) {
                                 if (deductResponse.getSuccess()) {
                                     completableFuture.complete(
-                                            new PaymentDto(
-                                                    true,
-                                                    "Payment successful"));
+                                            new PaymentDto(true, "Payment successful"));
                                 } else {
                                     completableFuture.complete(
-                                            new PaymentDto(
-                                                    false,
-                                                    deductResponse
-                                                            .getMessage()));
+                                            new PaymentDto(false, deductResponse.getMessage()));
                                 }
                             }
+
                             @Override
                             public void onError(Throwable t) {
                                 completableFuture.completeExceptionally(t);
                             }
+
                             @Override
                             public void onCompleted() {}
                         });
 
-        for(int i = 0;i<amount;i++) {
+        for (int i = 0; i < amount; i++) {
             deductRequestStream.onNext(
-                    Account.DeductRequest.newBuilder()
-                            .setUserId(userId)
-                            .setAmount(1)
-                            .build());
+                    Account.DeductRequest.newBuilder().setUserId(userId).setAmount(1).build());
         }
         deductRequestStream.onCompleted();
-
 
         return completableFuture;
     }

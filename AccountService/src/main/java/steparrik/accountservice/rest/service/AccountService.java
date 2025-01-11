@@ -1,7 +1,6 @@
 package steparrik.accountservice.rest.service;
 
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,9 +28,8 @@ public class AccountService {
     @Transactional
     public DeductResponse deductBalance(@RequestBody DeductRequest request) {
         Integer amount = request.getAmount();
-        Account account =
-                entityManager.find(
-                        Account.class, request.getUserId(), LockModeType.PESSIMISTIC_WRITE);
+
+        Account account = accountRepository.getAccountByUserId(request.getUserId());
 
         Integer currentBalance = account.getAmount();
         if (currentBalance >= amount) {

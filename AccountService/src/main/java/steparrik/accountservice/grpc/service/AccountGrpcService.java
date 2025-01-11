@@ -5,8 +5,6 @@ import account.Account.AccountResponse;
 import account.Account.DeductRequest;
 import account.Account.DeductResponse;
 import io.grpc.stub.StreamObserver;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -20,7 +18,6 @@ import steparrik.accountservice.rest.repository.AccountRepository;
 @RequiredArgsConstructor
 public class AccountGrpcService extends account.AccountServiceGrpc.AccountServiceImplBase {
     private final AccountRepository accountRepository;
-    private final EntityManager entityManager;
     private final PlatformTransactionManager transactionManager;
 
     @Override
@@ -43,9 +40,7 @@ public class AccountGrpcService extends account.AccountServiceGrpc.AccountServic
             DeductRequest request, StreamObserver<DeductResponse> responseObserver) {
         int amount = request.getAmount();
 
-        Account account =
-                entityManager.find(
-                        Account.class, request.getUserId(), LockModeType.PESSIMISTIC_WRITE);
+        Account account = accountRepository.getAccountByUserId(request.getUserId());
         Integer currentBalance = account.getAmount();
         if (currentBalance >= amount) {
             currentBalance -= amount;
@@ -109,9 +104,8 @@ public class AccountGrpcService extends account.AccountServiceGrpc.AccountServic
                     String userId = request.getUserId();
                     int amount = request.getAmount();
 
-                    Account account =
-                            entityManager.find(
-                                    Account.class, userId, LockModeType.PESSIMISTIC_WRITE);
+                    Account account = accountRepository.getAccountByUserId(userId);
+
                     Integer currentBalance = account.getAmount();
 
                     DeductResponse response;

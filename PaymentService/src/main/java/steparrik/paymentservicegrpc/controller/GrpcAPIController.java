@@ -4,13 +4,13 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import steparrik.paymentservicegrpc.dto.PaymentDto;
-import steparrik.paymentservicegrpc.service.PaymentGrpcService;
+import steparrik.paymentservicegrpc.service.PaymentGrpcClient;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/payment/grpc/")
 public class GrpcAPIController {
-    private final PaymentGrpcService paymentService;
+    private final PaymentGrpcClient paymentService;
 
     @GetMapping("/{userId}")
     private PaymentDto makePayment(@PathVariable String userId, @RequestParam Integer amount) {
